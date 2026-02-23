@@ -21,7 +21,9 @@ final class TaackMetaModelService {
     @Value('${exe.dot.path}')
     String exeDotPath
 
-    static Map<Class<? extends GormEntity>, List<Pair<ManagedType<?>, Set<Attribute<?, ?>>>>> cachedData = [:]
+    static private final Map<Class<? extends GormEntity>, List<Pair<ManagedType<?>, Set<Attribute<?, ?>>>>> cachedData = [:]
+
+    static private final Map<Class, Map<Class, Class>> adapters = [:]
 
     private List<Pair<ManagedType<?>, Set<Attribute<?, ?>>>> listClassPointingTo(final Class<? extends GormEntity> toClass, final boolean includeSelf = false) {
         if (cachedData.containsKey(toClass)) return cachedData[toClass]
@@ -191,13 +193,13 @@ final class TaackMetaModelService {
     }
 
     /**
-     * List Embedding Objects From Field Info List, where the Field Info Value is not null
+     * List Embedding Objects From Field Info which point to a collection
      *
      * @param fields
      * @param constrainedIds: Constraints on Field Info Values
      * @return List of Embedding Objects
      */
-    Collection<? extends GormEntity> listEmbeddingObjectsFromFieldInfoListNotNull(Collection<FieldInfo<? extends GormEntity>> fields, Collection<Long> constrainedIds = null) {
+    Collection<? extends GormEntity> listEmbeddingObjectsFromFieldInfoCollection(Collection<FieldInfo<? extends GormEntity>> fields, Collection<Long> constrainedIds = null) {
         List<? extends GormEntity> res = []
         fields.each {
             final boolean isListOrSet = Collection.isAssignableFrom(it.fieldConstraint.field.type)
@@ -215,4 +217,29 @@ final class TaackMetaModelService {
         res
     }
 
+    /**
+     * Simple Adapter Factory getter
+     *
+     * @param toInterface
+     * @param fromInterface
+     * @return The Adapter
+     */
+    static<T, U, V> Class<T> getAdapterFactory(Class<U> toInterface, Class<V> fromInterface) {
+        if (adapters.containsKey(toInterface))
+            if (adapters[toInterface].containsKey(fromInterface)) return adapters[toInterface][fromInterface]
+        null
+    }
+
+    /**
+     * Simple Adapter Factory Setter. Last registered Adapter will replace previous ones.
+     *
+     * @param toInterface
+     * @param fromInterface
+     * @param adapterClass
+     */
+    static<T, U, V> void setAdapterInFactory(Class<U> toInterface, Class<V> fromInterface, Class<T> adapterClass) {
+        if (!adapters.containsKey(toInterface))
+            adapters.put(toInterface, [:])
+        adapters[toInterface][fromInterface] = adapterClass
+    }
 }
