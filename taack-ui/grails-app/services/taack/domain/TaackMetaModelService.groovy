@@ -224,7 +224,7 @@ final class TaackMetaModelService {
      * @param fromInterface
      * @return The Adapter
      */
-    static<T, U, V> Class<T> getAdapterFactory(Class<U> toInterface, Class<V> fromInterface) {
+    static<T, U, V> Class<T> adapterFactoryGetter(Class<U> toInterface, Class<V> fromInterface) {
         if (adapters.containsKey(toInterface))
             if (adapters[toInterface].containsKey(fromInterface)) return adapters[toInterface][fromInterface]
         null
@@ -237,9 +237,13 @@ final class TaackMetaModelService {
      * @param fromInterface
      * @param adapterClass
      */
-    static<T, U, V> void setAdapterInFactory(Class<U> toInterface, Class<V> fromInterface, Class<T> adapterClass) {
+    static<T, U, V> void adapterFactorySetter(Class<U> toInterface, Class<V> fromInterface, Class<T> adapterClass) {
         if (!adapters.containsKey(toInterface))
             adapters.put(toInterface, [:])
         adapters[toInterface][fromInterface] = adapterClass
+    }
+
+    static String adapterFactoryDump() {
+        adapters.toString()
     }
 }
