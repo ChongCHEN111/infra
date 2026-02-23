@@ -96,9 +96,12 @@ final class RawHtmlTableDump implements IUiTableVisitor {
             displayBlock += style
         }
         HTMLTxtContent cellHTML = new HTMLTxtContent(cell ?: '<br/>')
-        if (!url) return new HTMLSpan().builder
-                .setStyle(displayBlock)//.putAttribute('title', cell ?: '')
-                .addChildren(cellHTML).build()
+        if (!url) {
+            HTMLSpan speedSpan = new HTMLSpan()
+            speedSpan.addChildren(cellHTML)
+            speedSpan.styleDescriptor = displayBlock
+            return speedSpan
+        }
         return new HTMLAnchor(true, url).builder.addChildren(cellHTML).build()
     }
 
@@ -365,40 +368,43 @@ final class RawHtmlTableDump implements IUiTableVisitor {
 //, firstInCol, isInCol))
             if (addColumn) visitColumnEnd()
         } else {
-            visitRowField(dataFormat(fieldInfo?.value, format, parameter.lcl), style)
+            appendRowField(dataFormat(fieldInfo?.value, format, parameter.lcl), style, false)
         }
     }
 
     @Override
     void visitRowField(final GetMethodReturn fieldInfo, final String format, final Style style) {
-        visitRowField(dataFormat(fieldInfo?.value, format, parameter.lcl), style)
+        appendRowField(dataFormat(fieldInfo?.value, format, parameter.lcl), style, false)
+    }
+
+    private appendRowField(final String value, final Style style, final boolean sanitize) {
+        boolean addColumn = !isInCol
+        if (addColumn) visitColumn(null, null)
+        if (sanitize) blockLog.topElement.builder.addChildren(displayCell(TaackUiEnablerService.sanitizeString(value), style, null))
+        else blockLog.topElement.builder.addChildren(displayCell(value, style, null))
+//, firstInCol, isInCol))
+        if (addColumn) visitColumnEnd()
+
     }
 
     @Override
     void visitRowField(final String value, final Style style) {
-        boolean addColumn = !isInCol
-        if (addColumn) visitColumn(null, null)
-        blockLog.topElement.builder.addChildren(displayCell(TaackUiEnablerService.sanitizeString(value), style, null))
-//, firstInCol, isInCol))
-        if (addColumn) visitColumnEnd()
+        appendRowField(value, style, true)
     }
 
     @Override
     void visitRowField(Number value, NumberFormat locale, Style style) {
-        visitRowField(locale.format(value), style)
+        appendRowField(locale.format(value), style, false)
     }
 
     @Override
     void visitRowField(Date value, DateFormat locale, Style style) {
-        visitRowField(locale.format(value), style)
+        appendRowField(locale.format(value), style, false)
     }
 
     @Override
     void visitRowFieldRaw(final String value, final Style style) {
-        boolean addColumn = !isInCol
-        if (addColumn) visitColumn(null, null)
-        blockLog.topElement.builder.addChildren(displayCell(value, style, null))//, firstInCol, isInCol))
-        if (addColumn) visitColumnEnd()
+        appendRowField(value, style, false)
     }
 
     @Override

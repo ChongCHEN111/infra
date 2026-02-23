@@ -7,15 +7,14 @@ import org.springframework.context.i18n.LocaleContextHolder
 import taack.ast.type.FieldInfo
 import taack.ast.type.GetMethodReturn
 import taack.render.TaackUiEnablerService
-import taack.render.TaackUiService
 import taack.ui.IEnumOptions
 import taack.ui.dsl.branching.BranchingSpec
 import taack.ui.dsl.common.ActionIcon
 import taack.ui.dsl.common.Style
 import taack.ui.dsl.helper.Utils
 
+import java.text.DateFormat
 import java.text.NumberFormat
-
 /**
  * Specify fields to be drawn in a row or a rowColumn.
  */
@@ -37,11 +36,15 @@ class RowColumnFieldSpec implements BranchingSpec {
         tableVisitor.visitRowField(value, style)
     }
 
-    void rowField(final BigDecimal value, NumberFormat nf, final Style style = Style.ALIGN_RIGHT) {
+    void rowField(final Date value, DateFormat locale = null, final Style style = null) {
+        tableVisitor.visitRowField(value, locale, style)
+    }
+
+    void rowField(final Number value, NumberFormat nf, final Style style = Style.ALIGN_RIGHT) {
         tableVisitor.visitRowField(value, nf, style)
     }
 
-    void rowField(final BigDecimal value, final Style style = Style.ALIGN_RIGHT) {
+    void rowField(final Number value, final Style style = Style.ALIGN_RIGHT) {
         rowField(value, NumberFormat.getInstance(LocaleContextHolder.locale), style)
     }
 
