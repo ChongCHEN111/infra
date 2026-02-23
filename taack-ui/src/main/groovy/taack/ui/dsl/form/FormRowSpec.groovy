@@ -31,8 +31,8 @@ class FormRowSpec extends FormAjaxFieldSpec {
      * @param width its relative width
      * @param closure Description of the content of this section
      */
-    void section(String sectionName, @DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = FormRowSpec) Closure closure) {
-        formVisitor.visitFormSection(sectionName)
+    void section(String sectionName, boolean initiallyCollapsed = false, @DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = FormRowSpec) Closure closure) {
+        formVisitor.visitFormSection(sectionName, initiallyCollapsed)
         closure.delegate = new FormRowSpec(formVisitor)
         closure.call()
         formVisitor.visitFormSectionEnd()
@@ -45,8 +45,8 @@ class FormRowSpec extends FormAjaxFieldSpec {
      * @param width its relative width
      * @param closure Description of the content of this section
      */
-    void section(@DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = FormRowSpec) Closure closure) {
-        formVisitor.visitFormSection(null)
+    void section(boolean initiallyCollapsed = false, @DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = FormRowSpec) Closure closure) {
+        formVisitor.visitFormSection(null, initiallyCollapsed)
         closure.delegate = new FormRowSpec(formVisitor)
         closure.call()
         formVisitor.visitFormSectionEnd()

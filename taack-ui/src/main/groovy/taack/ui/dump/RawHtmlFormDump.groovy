@@ -34,11 +34,11 @@ final class RawHtmlFormDump implements IUiFormVisitor {
     final private Parameter parameter
 
     private Object aObject
-
+    private boolean uncollapseSection
     private int tabOccurrence = 0
     private FieldInfo[] lockedFields
 
-    final IFormTheme formThemed
+    final BootstrapForm formThemed
     final BlockLog blockLog
     final BootstrapLayout layout
 
@@ -95,13 +95,17 @@ final class RawHtmlFormDump implements IUiFormVisitor {
     }
 
     @Override
-    void visitFormSection(String i18n) {
+    void visitFormSection(String i18n, boolean initiallyCollapsed) {
+        uncollapseSection = false
+
         i18n ?= parameter.trField(parameter.controllerName, parameter.actionName, false)
-        blockLog.topElement = formThemed.section(blockLog.topElement, i18n, false)
+        blockLog.topElement = formThemed.section(blockLog.topElement, i18n, initiallyCollapsed)
     }
 
     @Override
     void visitFormSectionEnd() {
+        uncollapseSection = false
+
         blockLog.topElement = blockLog.topElement.toParentTaackTag(TaackTag.SECTION).parent
     }
 

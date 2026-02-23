@@ -23,7 +23,7 @@ class UiFormVisitorImpl implements IUiFormVisitor {
     }
 
     @Override
-    void visitFormSection(String i18n) {
+    void visitFormSection(String i18n, boolean collapse) {
 
     }
 

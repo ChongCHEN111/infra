@@ -21,7 +21,7 @@ interface IUiFormVisitor {
 
     void visitFormEnd()
 
-    void visitFormSection(final String i18n)
+    void visitFormSection(final String i18n, boolean initiallyCollapsed)
 
     void visitFormSectionEnd()
 
