@@ -193,7 +193,7 @@ final class TaackMetaModelService {
     }
 
     /**
-     * List Embedding Objects From Field Info which point to a collection
+     * List Embedding Objects From Field Info which point to a collection.
      *
      * @param fields
      * @param constrainedIds: Constraints on Field Info Values
@@ -218,26 +218,26 @@ final class TaackMetaModelService {
     }
 
     /**
-     * Simple Adapter Factory getter
+     * Simple Adapter Factory getter. Adapter must implement toInterface.
      *
      * @param toInterface
      * @param fromInterface
      * @return The Adapter
      */
-    static<T, U, V> Class<T> adapterFactoryGetter(Class<U> toInterface, Class<V> fromInterface) {
+    static<T extends U, U, V> Class<T> adapterFactoryGetter(Class<U> toInterface, Class<V> fromInterface) {
         if (adapters.containsKey(toInterface))
             if (adapters[toInterface].containsKey(fromInterface)) return adapters[toInterface][fromInterface]
         null
     }
 
     /**
-     * Simple Adapter Factory Setter. Last registered Adapter will replace previous ones.
+     * Simple Adapter Factory Setter. Last registered Adapter will replace previous ones. Adapter must implement toInterface.
      *
      * @param toInterface
      * @param fromInterface
      * @param adapterClass
      */
-    static<T, U, V> void adapterFactorySetter(Class<U> toInterface, Class<V> fromInterface, Class<T> adapterClass) {
+    static<T extends U, U, V> void adapterFactorySetter(Class<U> toInterface, Class<V> fromInterface, Class<T> adapterClass) {
         if (!adapters.containsKey(toInterface))
             adapters.put(toInterface, [:])
         adapters[toInterface][fromInterface] = adapterClass
