@@ -5,7 +5,13 @@ import groovy.transform.CompileStatic
 enum ButtonStyle {
     PRIMARY('btn-primary'),
     SUCCESS('btn-success'),
-    SECONDARY('btn-secondary')
+    SECONDARY('btn-secondary'),
+    DANGER('btn-danger'),
+    WARNING('btn-warning'),
+    INFO('btn-info'),
+    LIGHT('btn-light'),
+    DARK('btn-dark'),
+    LINK('btn-link')
 
     ButtonStyle(String classString) {
         this.classString = classString
