@@ -639,7 +639,7 @@ ${bootstrapJsTag}
 """
 
         bout << """\
-<div id="taack-load-spinner" class="tck-hidden"></div>
+<div id="taack-load-spinner"></div>
 <div id="taack-modal-minimize-items"></div>
 
 <div id="taack-main-block">"""

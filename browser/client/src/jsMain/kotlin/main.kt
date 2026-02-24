@@ -1,5 +1,6 @@
-
 import taack.ui.base.element.Block
+import web.cssom.ClassName
+import web.dom.ElementId
 import web.dom.document
 import web.events.EventHandler
 import web.events.EventType
@@ -22,6 +23,7 @@ fun main() {
 
         document.addEventListener(EventType("DOMContentLoaded"), EventHandler {
             onclickDisabled = false
+            document.getElementById(ElementId("taack-load-spinner"))?.classList?.add(ClassName("tck-hidden"))
             Block.href = location.href
             Block.getSiblingBlock(null)
             window.onpopstate = EventHandler {
@@ -34,5 +36,8 @@ fun main() {
                 localStorage.removeItem("y-scroll")
             }
         })
-    }
+    } else
+        document.addEventListener(EventType("DOMContentLoaded"), EventHandler {
+            document.getElementById(ElementId("taack-load-spinner"))?.classList?.add(ClassName("tck-hidden"))
+        })
 }
