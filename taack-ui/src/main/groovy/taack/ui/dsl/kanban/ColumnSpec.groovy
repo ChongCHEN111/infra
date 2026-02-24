@@ -1,7 +1,10 @@
 package taack.ui.dsl.kanban
 
+import grails.util.Holders
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.runtime.MethodClosure
 import taack.ast.type.FieldInfo
+import taack.render.TaackUiEnablerService
 import taack.ui.dsl.common.Style
 
 /**
@@ -12,6 +15,7 @@ import taack.ui.dsl.common.Style
 @CompileStatic
 final class ColumnSpec {
     final IUiKanbanVisitor kanbanVisitor
+    TaackUiEnablerService taackUiEnablerService = Holders.grailsApplication.mainContext.getBean('taackUiEnablerService') as TaackUiEnablerService
 
     ColumnSpec(IUiKanbanVisitor kanbanVisitor) {
         this.kanbanVisitor = kanbanVisitor
@@ -27,7 +31,21 @@ final class ColumnSpec {
     }
 
     void card(FieldInfo cardId, @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = CardFieldSpec) Closure closure) {
-        kanbanVisitor.visitCard(cardId)
+        kanbanVisitor.visitCard(cardId, null, null)
+        closure.delegate = new CardFieldSpec(kanbanVisitor)
+        closure.call()
+        kanbanVisitor.visitCardEnd()
+    }
+
+    void card(FieldInfo cardId, MethodClosure action, Map<String, ? extends Object> params = null, @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = CardFieldSpec) Closure closure) {
+        kanbanVisitor.visitCard(cardId, taackUiEnablerService.hasAccess(action, params) ? action : null, params)
+        closure.delegate = new CardFieldSpec(kanbanVisitor)
+        closure.call()
+        kanbanVisitor.visitCardEnd()
+    }
+
+    void card(FieldInfo cardId, MethodClosure action, Long id, @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = CardFieldSpec) Closure closure) {
+        kanbanVisitor.visitCard(cardId, taackUiEnablerService.hasAccess(action, id) ? action : null, id ? [id: id] : null)
         closure.delegate = new CardFieldSpec(kanbanVisitor)
         closure.call()
         kanbanVisitor.visitCardEnd()

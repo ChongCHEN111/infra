@@ -113,13 +113,14 @@ final class RawHtmlKanbanDump implements IUiKanbanVisitor {
     }
 
     @Override
-    void visitCard(FieldInfo cardId) {
+    void visitCard(FieldInfo cardId, MethodClosure action, Map<String, ? extends Object> params) {
         blockLog.enterBlock('visitCard')
         String cardIdValue = null
         if (cardId?.value != null) {
             cardIdValue = cardId.fieldName == 'selfObject' ? cardId.value['id']?.toString() : cardId.value.toString()
         }
         HTMLDiv cardDiv = new HTMLDiv().builder.addClasses('kanban-card').setTaackTag(TaackTag.KANBAN_CARD)
+                .putAttribute('taackDbClickAction', action ? parameter.urlMapped(Utils.getControllerName(action), action.method.toString(), params) : null)
                 .putAttribute('cardId', cardIdValue ?: '')
                 .putAttribute('draggable', 'true').build() as HTMLDiv
         blockLog.topElement.builder.addChildren(cardDiv)

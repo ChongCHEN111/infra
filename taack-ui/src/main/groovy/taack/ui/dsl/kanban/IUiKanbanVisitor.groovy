@@ -23,7 +23,7 @@ interface IUiKanbanVisitor {
 
     void visitColumnHeader(String i18n, Style style)
 
-    void visitCard(FieldInfo cardId)
+    void visitCard(FieldInfo cardId, MethodClosure action, Map<String, ? extends Object> params)
 
     void visitCardEnd()
 
