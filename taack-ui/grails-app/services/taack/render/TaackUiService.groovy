@@ -527,6 +527,15 @@ final class TaackUiService implements WebAttributes, ResponseRenderer, DataBinde
         <meta name="color-scheme" content="light">
         <meta name="theme-color" content="#111111" media="(prefers-color-scheme: light)">
 """
+        if (clientJsPath != null && !clientJsPath.empty)
+            bout << """\
+    <script src="${clientJsPath}"></script>
+    <script src="/assets/application-taack-debug.js"></script>
+"""
+        else
+            bout << """\
+    <script src="/assets/application-taack.js"></script>
+    """
         bout << """\
     <title>${conf.defaultTitle}</title>
     ${bootstrapCssTag}
@@ -560,7 +569,8 @@ final class TaackUiService implements WebAttributes, ResponseRenderer, DataBinde
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">"""
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+"""
 
         menuBlock.getOutput(bout)
 
@@ -572,7 +582,7 @@ final class TaackUiService implements WebAttributes, ResponseRenderer, DataBinde
             if (currentUser) {
                 String switchedUsername = SpringSecurityUtils.getSwitchedUserOriginalUsername()
                 if (switchedUsername)
-                    bout << """
+                    bout << """\
                     <li class="nav-item dropdown">
                         <form action='${request.contextPath}/logout/impersonate' method='POST'>
                             <input type='submit'
@@ -581,7 +591,7 @@ final class TaackUiService implements WebAttributes, ResponseRenderer, DataBinde
                     </li>
                 """
                 else
-                    bout << """
+                    bout << """\
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" id="navbarUser" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -601,7 +611,7 @@ final class TaackUiService implements WebAttributes, ResponseRenderer, DataBinde
                 """
             }
         } else
-            bout << """
+            bout << """\
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" id="navbarUser" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -625,23 +635,19 @@ final class TaackUiService implements WebAttributes, ResponseRenderer, DataBinde
     </div>
 </nav>
 
+${bootstrapJsTag}
+"""
+
+        bout << """\
+<div id="taack-load-spinner" class="tck-hidden"></div>
+<div id="taack-modal-minimize-items"></div>
+
 <div id="taack-main-block">"""
         htmlBlock.getOutput(bout)
         bout << """\
 </div>
-<div id="taack-load-spinner" class="tck-hidden"></div>
-<div id="taack-modal-minimize-items"></div>
-${bootstrapJsTag}
 """
-        if (clientJsPath != null && !clientJsPath.empty)
-            bout << """\
-    <script src="${clientJsPath}"></script>
-    <script src="/assets/application-taack-debug.js"></script>
-"""
-        else
-            bout << """\
-    <script src="/assets/application-taack.js"></script>
-    """
+
         bout << """\
 </body>
 </html>
