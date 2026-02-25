@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory
 import org.hibernate.query.Query
 import taack.ast.type.FieldInfo
 import taack.ast.type.GetMethodReturn
+import taack.ui.IEnumOption
 import taack.ui.dsl.UiFilterSpecifier
 import taack.ui.dsl.filter.UiFilterVisitorImpl
 import taack.ui.dsl.filter.expression.FilterExpression
@@ -17,7 +18,6 @@ import taack.utils.DateFormat
 
 import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
-
 /**
  * Service allowing to automatically filter data in a tableFilter. It is typically
  * used in a table block. It uses params given from the {@link UiFilterSpecifier} to filter data.
@@ -474,6 +474,92 @@ final class TaackFilter<T extends GormEntity<T>> {
 
         println filter
         Map<String, Object> namedParams = [:]
+
+        if (filterSpecifier) {
+            filterSpecifier.visitFilter(new UiFilterVisitorImpl() {
+
+                List<List<String>> opOps = []
+
+                @Override
+                void visitFilterField(String i18n, IEnumOption[] enumOptions, FieldInfo... fieldInfos) {
+                    FieldInfo fieldInfo = fieldInfos.last()
+                    final String qualifiedName = RawHtmlFilterDump.getQualifiedName(fieldInfos)
+                    if (theParams.containsKey(qualifiedName) || !fieldInfo.value) return
+                    filter.put(qualifiedName, fieldInfo.value)
+//                    final Class type = fieldInfo?.fieldConstraint?.field?.type
+//                    final boolean isEnum = type?.isEnum()
+//                    if (enumOptions) {
+//                        EnumOptions eos = value != null ? new EnumOptions(enumOptions, qualifiedName, value) : isEnum ? new EnumOptions(enumOptions, qualifiedName, fieldInfo?.value as Enum) : new EnumOptions(enumOptions, qualifiedName, fieldInfo?.value?.toString())
+//                    } else if (isEnum) {
+//                        EnumOptions eos = value != null ? new EnumOptions(type as Class<Enum>, qualifiedName, value) : new EnumOptions(type as Class<Enum>, qualifiedName, fieldInfo?.value as Enum)
+//                    } else if (type == boolean || type == Boolean) {
+//                        Boolean isChecked = value != null ? (value == '1' ? true : value == '0' ? false : null) : (fieldInfo?.value as Boolean)
+//                    } else if (type == Date) {
+//                        Date date = (value != null ? parseDate(value) : fieldInfo?.value) as Date
+//                    } else {
+//                        String s = value != null ? value : fieldInfo.value
+//                    }
+
+                }
+
+                @Override
+                void visitFilterFieldExpressionBool(FilterExpression... filterExpression) {
+                    filterExpression.each {
+                        occ = visitFilterFieldExpressionBool(it, occ, where, namedParams)
+                    }
+                }
+
+                @Override
+                void visitFilterFieldExpressionBool(String i18n, Boolean defaultValue, FilterExpression[] filterExpressions) {
+                    String qualifiedName = filterExpressions*.qualifiedName.join('_')
+                    boolean applyFilter = (theParams[qualifiedName] || theParams[qualifiedName + 'Default']) ? (theParams[qualifiedName] == '1' || (defaultValue && !theParams[qualifiedName + 'Default'])) : defaultValue
+                    if (!applyFilter) return
+
+                    filterExpressions.each {
+                        occ = visitFilterFieldExpressionBool(it, occ, where, namedParams)
+                    }
+                }
+
+                @Override
+                void visitInnerFilter(UiFilterSpecifier uiFilterSpecifier, FieldInfo... fieldInfos) {
+
+                }
+
+                @Override
+                void visitOrOp() {
+                    opOps.push(where)
+                    where = []
+                }
+
+                @Override
+                void visitOrOpEnd() {
+                    List<String> oldWhere = opOps.pop()
+                    if (where.size() > 0) {
+                        String orWhere = '(' + where.join(' or ') + ')'
+                        where = oldWhere + orWhere
+                    } else
+                        where = oldWhere
+                }
+
+                @Override
+                void visitAndOp() {
+                    opOps.push(where)
+                    where = []
+                }
+
+                @Override
+                void visitAndOpEnd() {
+                    List<String> oldWhere = opOps.pop()
+                    if (where.size() > 0) {
+                        String andWhere = '(' + where.join(' and ') + ')'
+                        where = oldWhere + andWhere
+                    } else
+                        where = oldWhere
+                }
+            })
+        }
+
+
         filter?.each { Map.Entry<String, Object> entry ->
             if (entry.value && !filterMeta.contains(entry.key) && !entry.key.contains('filterExpression')) {
                 final String entryKey = entry.key as String
@@ -587,62 +673,6 @@ final class TaackFilter<T extends GormEntity<T>> {
             }
         }
 
-        if (filterSpecifier) {
-            filterSpecifier.visitFilter(new UiFilterVisitorImpl() {
-
-                List<List<String>> opOps = []
-
-                @Override
-                void visitFilterFieldExpressionBool(FilterExpression... filterExpression) {
-                    filterExpression.each {
-                        occ = visitFilterFieldExpressionBool(it, occ, where, namedParams)
-                    }
-                }
-
-                @Override
-                void visitFilterFieldExpressionBool(String i18n, Boolean defaultValue, FilterExpression[] filterExpressions) {
-                    String qualifiedName = filterExpressions*.qualifiedName.join('_')
-                    boolean applyFilter = (theParams[qualifiedName] || theParams[qualifiedName + 'Default']) ? (theParams[qualifiedName] == '1' || (defaultValue && !theParams[qualifiedName + 'Default'])) : defaultValue
-                    if (!applyFilter) return
-
-                    filterExpressions.each {
-                        occ = visitFilterFieldExpressionBool(it, occ, where, namedParams)
-                    }
-                }
-
-                @Override
-                void visitOrOp() {
-                    opOps.push(where)
-                    where = []
-                }
-
-                @Override
-                void visitOrOpEnd() {
-                    List<String> oldWhere = opOps.pop()
-                    if (where.size() > 0) {
-                        String orWhere = '(' + where.join(' or ') + ')'
-                        where = oldWhere + orWhere
-                    } else
-                        where = oldWhere
-                }
-
-                @Override
-                void visitAndOp() {
-                    opOps.push(where)
-                    where = []
-                }
-
-                @Override
-                void visitAndOpEnd() {
-                    List<String> oldWhere = opOps.pop()
-                    if (where.size() > 0) {
-                        String andWhere = '(' + where.join(' and ') + ')'
-                        where = oldWhere + andWhere
-                    } else
-                        where = oldWhere
-                }
-            })
-        }
 
         join = buildJoinClause() ? buildJoinClause().append(join) : join
         String simpleOrder = filter['order'] ?: order?.toString()
