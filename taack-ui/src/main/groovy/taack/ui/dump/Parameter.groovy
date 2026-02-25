@@ -79,7 +79,7 @@ final class Parameter implements WebAttributes {
         this.fieldName = params.get(P_FIELD_NAME) ?: null
         this.paramsToKeep = [:]
         paramsToKeep.each {
-            if (params[it] != null) this.paramsToKeep.put(it, params[it])
+            if (params[it] != null && !params[it].toString().trim().empty) this.paramsToKeep.put(it, params[it])
         }
         this.ajaxBlockId = params.get('ajaxBlockId') ?: null
         this.targetAjaxBlockId = params.get('targetAjaxBlockId') ?: null
@@ -209,14 +209,15 @@ final class Parameter implements WebAttributes {
         urlMapped(controller, action, null, params, isAjax)
     }
 
-    final String urlMapped(String controller, String action, Long id, Map<String, ? extends Object> params = null, boolean isAjax = false) {
+    final String urlMapped(String controller, String action, Long id, Map<String, ? extends Object> params = null, boolean isAjax = false, boolean includeParamsToKeep = true) {
         def p = params ?: [:]
         if (isAjax) {
             p.put('isAjax', true)
         }
-        paramsToKeep.each {
-            p.putIfAbsent(it.key, it.value)
-        }
+        if (includeParamsToKeep)
+            paramsToKeep.each {
+                p.putIfAbsent(it.key, it.value)
+            }
         applicationTagLib.createLink(controller: controller, action: action, params: p, absolute: target == RenderingTarget.MAIL, id: id)
     }
 

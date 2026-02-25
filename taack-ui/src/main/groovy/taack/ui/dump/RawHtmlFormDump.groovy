@@ -235,14 +235,14 @@ final class RawHtmlFormDump implements IUiFormVisitor {
     @Override
     void visitFormAction(String i18n, String controller, String action, Long id, Map params, ButtonStyle style) {
         i18n ?= parameter.trField(controller, action, id != null || params?.containsKey('id'))
-        formActions.add new Triple<String, ButtonStyle, String>(i18n, style, parameter.urlMapped(controller, action, id, params))
+        formActions.add new Triple<String, ButtonStyle, String>(i18n, style, parameter.urlMapped(controller, action, id, params, false, false))
     }
 
     @Override
     void visitInnerFormAction(String i18n, String controller, String action, Long id, Map params, ButtonStyle style) {
         blockLog.topElement = formThemed.formActionBlock blockLog.topElement
         i18n ?= parameter.trField(controller, action, id != null || params?.containsKey('id'))
-        formThemed.addFormAction(blockLog.topElement, parameter.urlMapped(controller, action, id, params), i18n, style)
+        formThemed.addFormAction(blockLog.topElement, parameter.urlMapped(controller, action, id, params, false, false), i18n, style)
         blockLog.topElement = blockLog.topElement.parent
     }
 

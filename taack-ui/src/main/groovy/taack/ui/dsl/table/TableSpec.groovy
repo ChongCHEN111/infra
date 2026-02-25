@@ -86,7 +86,7 @@ final class TableSpec {
         res.bValue
     }
 
-    final<T extends GormEntity> Long iterate(Pair<List<T>, Long> builtFilterPair, Long maxNumberOfLine, boolean showPaginate = true, @DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = RowColumnSpec) Closure c) {
+    final<T> Long iterate(Pair<List<T>, Long> builtFilterPair, Long maxNumberOfLine, boolean showPaginate = true, @DelegatesTo(strategy = Closure.DELEGATE_ONLY, value = RowColumnSpec) Closure c) {
         c.delegate = new RowColumnSpec(tableVisitor)
         Date lastReadingDate = tableVisitor.getLastReadingDate()
         String readingDateField = tableVisitor.getReadingDateFieldString()
